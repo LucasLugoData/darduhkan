@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -7,6 +9,7 @@ import '../state/order.dart';
 import '../theme.dart';
 import '../widgets/arch.dart';
 import '../widgets/common.dart';
+import '../widgets/smoke.dart';
 import 'cart_screen.dart';
 import 'item_screen.dart';
 import 'welcome_screen.dart';
@@ -78,57 +81,59 @@ class _MenuScreenState extends State<MenuScreen> {
     }
 
     return Scaffold(
-      body: Stack(
-        children: [
-          SafeArea(
-            bottom: false,
-            child: CustomScrollView(
-              controller: _scroll,
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              slivers: [
-                SliverToBoxAdapter(child: _header(order)),
-                SliverToBoxAdapter(child: _hero()),
-                SliverToBoxAdapter(child: _searchField()),
-                SliverPersistentHeader(pinned: true, delegate: _ChipsHeader(_chips())),
-                if (!searching) SliverToBoxAdapter(child: _banner()),
-                if (items.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Text('Nada por aquí con "$_query"', style: TextStyle(color: DD.textDim)),
-                    ),
-                  ),
-                for (final entry in sections.entries) ...[
-                  if (sections.length > 1 || searching)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 22, 24, 6),
-                        child: Text(entry.key, style: DD.script(size: 24, color: DD.silver)),
+      body: Smoke(
+        child: Stack(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: CustomScrollView(
+                controller: _scroll,
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                slivers: [
+                  SliverToBoxAdapter(child: _header(order)),
+                  SliverToBoxAdapter(child: _hero()),
+                  SliverToBoxAdapter(child: _searchField()),
+                  SliverPersistentHeader(pinned: true, delegate: _ChipsHeader(_chips())),
+                  if (!searching) SliverToBoxAdapter(child: _banner()),
+                  if (items.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Text('Nada por aquí con "$_query"', style: TextStyle(color: DD.textDim)),
                       ),
                     ),
-                  SliverList.builder(
-                    itemCount: entry.value.length,
-                    itemBuilder: (_, i) {
-                      final item = entry.value[i];
-                      final siblings = searching ? items : itemsOf(item.category);
-                      return FadeSlideIn(
-                        key: ValueKey('${_category.id}-$_query-${item.id}'),
-                        delay: Duration(milliseconds: 30 * i.clamp(0, 10)),
-                        child: _ItemRow(
-                          item: item,
-                          onTap: () => _openItem(item, siblings),
-                          onAdd: () => _quickAdd(item, siblings),
+                  for (final entry in sections.entries) ...[
+                    if (sections.length > 1 || searching)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 22, 24, 6),
+                          child: Text(entry.key, style: DD.script(size: 24, color: DD.silver)),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    SliverList.builder(
+                      itemCount: entry.value.length,
+                      itemBuilder: (_, i) {
+                        final item = entry.value[i];
+                        final siblings = searching ? items : itemsOf(item.category);
+                        return FadeSlideIn(
+                          key: ValueKey('${_category.id}-$_query-${item.id}'),
+                          delay: Duration(milliseconds: 30 * i.clamp(0, 10)),
+                          child: _ItemRow(
+                            item: item,
+                            onTap: () => _openItem(item, siblings),
+                            onAdd: () => _quickAdd(item, siblings),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
                 ],
-                const SliverToBoxAdapter(child: SizedBox(height: 120)),
-              ],
+              ),
             ),
-          ),
-          _CartBar(order: order),
-        ],
+            _CartBar(order: order),
+          ],
+        ),
       ),
     );
   }
@@ -167,7 +172,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: const BoxDecoration(color: DD.ember, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(color: DD.accent, shape: BoxShape.circle),
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -208,23 +213,11 @@ class _MenuScreenState extends State<MenuScreen> {
         children: [
           Text(_greeting(), style: const TextStyle(color: DD.textDim, fontSize: 15)),
           const SizedBox(height: 6),
-          Text.rich(
-            TextSpan(
-              children: [
-                const TextSpan(text: '¿Qué te apetece\n'),
-                TextSpan(
-                  text: 'esta noche?',
-                  style: DD.script(size: 38, color: DD.ember),
-                ),
-              ],
-            ),
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              height: 1.15,
-              letterSpacing: -0.5,
-            ),
+          const Text(
+            '¿Qué te apetece',
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, height: 1.15, letterSpacing: -0.5),
           ),
+          ShimmerText('esta noche?', style: DD.script(size: 40)),
         ],
       ),
     );
@@ -315,7 +308,7 @@ class _MenuScreenState extends State<MenuScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [c.tint.withValues(alpha: 0.22), DD.surface],
+              colors: [c.tint.withValues(alpha: 0.16), DD.surface],
             ),
             border: Border.all(color: DD.line),
           ),
@@ -377,12 +370,20 @@ class _ChipsHeader extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: DD.bg.withValues(alpha: overlapsContent || shrinkOffset > 0 ? 0.96 : 1),
-        border: Border(bottom: BorderSide(color: overlapsContent ? DD.line : Colors.transparent)),
+    final stuck = overlapsContent || shrinkOffset > 0;
+    // Cristal esmerilado: al fijarse arriba difumina la carta y el humo que pasan por debajo.
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: stuck ? 24 : 0, sigmaY: stuck ? 24 : 0),
+        child: AnimatedContainer(
+          duration: DD.fast,
+          decoration: BoxDecoration(
+            color: DD.bg.withValues(alpha: stuck ? 0.55 : 0),
+            border: Border(bottom: BorderSide(color: stuck ? DD.line : Colors.transparent)),
+          ),
+          child: child,
+        ),
       ),
-      child: child,
     );
   }
 
@@ -413,7 +414,7 @@ class _ItemRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: DD.surface,
             borderRadius: BorderRadius.circular(DD.radius),
-            border: Border.all(color: DD.line.withValues(alpha: 0.6)),
+            border: Border.all(color: DD.line),
           ),
           child: Row(
             children: [
@@ -461,7 +462,7 @@ class _ItemRow extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: DD.line),
                   ),
-                  child: const Icon(Icons.add, size: 20, color: DD.ember),
+                  child: const Icon(Icons.add, size: 20, color: DD.accent),
                 ),
               ),
             ],

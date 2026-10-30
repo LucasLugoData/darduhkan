@@ -8,7 +8,7 @@ const shishas = Category(
   id: 'shishas',
   name: 'Shishas',
   icon: Icons.cloud_outlined,
-  tint: Color(0xFFFF6A3D),
+  tint: Color(0xFF8B7BFF),
   art: ArtKind.hookah,
   bannerTitle: 'Shisha 15\u00A0€',
   bannerText: 'Elige tu sabor. Cabeza extra 5\u00A0€',
@@ -17,7 +17,7 @@ const comida = Category(
   id: 'comida',
   name: 'Comida',
   icon: Icons.lunch_dining_outlined,
-  tint: Color(0xFFE9A23B),
+  tint: Color(0xFFC9A46A),
   bannerTitle: 'Tapas y bocadillos',
   bannerText: 'Para compartir mientras fumas',
 );
@@ -25,7 +25,7 @@ const cocteles = Category(
   id: 'cocteles',
   name: 'Cócteles',
   icon: Icons.local_bar_outlined,
-  tint: Color(0xFFE5577A),
+  tint: Color(0xFFD0668F),
   bannerTitle: 'Cócteles de autor',
   bannerText: 'Con y sin alcohol. Batidos naturales 5\u00A0€',
 );
@@ -33,7 +33,7 @@ const copas = Category(
   id: 'copas',
   name: 'Copas',
   icon: Icons.wine_bar_outlined,
-  tint: Color(0xFFC79A5B),
+  tint: Color(0xFFB58A55),
   bannerTitle: 'Copas',
   bannerText: 'Suplemento Red Bull / Premium 1\u00A0€',
 );
@@ -41,7 +41,7 @@ const cervezas = Category(
   id: 'cervezas',
   name: 'Cervezas',
   icon: Icons.sports_bar_outlined,
-  tint: Color(0xFFF2C14E),
+  tint: Color(0xFFD6B25E),
   bannerTitle: 'Cervezas y vino',
   bannerText: 'Siempre bien frías',
 );
@@ -49,7 +49,7 @@ const bebidas = Category(
   id: 'bebidas',
   name: 'Bebidas',
   icon: Icons.emoji_food_beverage_outlined,
-  tint: Color(0xFF4FB59B),
+  tint: Color(0xFF5DB5A6),
   bannerTitle: 'Té marroquí 3\u00A0€',
   bannerText: 'Cafés, infusiones y refrescos',
 );
@@ -57,7 +57,7 @@ const botellas = Category(
   id: 'botellas',
   name: 'Botellas',
   icon: Icons.liquor_outlined,
-  tint: Color(0xFFB9BCC6),
+  tint: Color(0xFFA9AEBC),
   bannerTitle: 'Botellas',
   bannerText: 'Para la mesa entera',
 );

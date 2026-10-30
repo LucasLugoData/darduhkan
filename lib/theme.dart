@@ -2,18 +2,29 @@ import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoPageTransitionsBui
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Paleta Dar Dukhan: negro profundo, plata de la marca y un acento brasa
-/// (el naranja salmón de las referencias, que aquí evoca el carbón de la shisha).
+/// Paleta Dar Dukhan: negro, humo de color en movimiento y cristal.
+/// El único acento sólido es un crema cálido sobre negro.
 abstract final class DD {
-  static const bg = Color(0xFF0A0A0B);
-  static const surface = Color(0xFF141416);
-  static const surfaceHi = Color(0xFF1C1C1F);
-  static const line = Color(0xFF29292D);
-  static const text = Color(0xFFF4F1EC);
-  static const textDim = Color(0xFF8E8C88);
-  static const silver = Color(0xFFC9C9CE);
-  static const ember = Color(0xFFFF6A3D);
-  static const emberSoft = Color(0xFFFF8F6B);
+  static const bg = Color(0xFF050506);
+  static const solid = Color(0xFF111113);
+
+  /// Superficies de cristal: dejan ver el humo del fondo.
+  static const surface = Color(0x0FFFFFFF);
+  static const surfaceHi = Color(0x17FFFFFF);
+  static const line = Color(0x14FFFFFF);
+  static const text = Color(0xFFF2EFEA);
+  static const textDim = Color(0xFF8C8A93);
+  static const silver = Color(0xFFC9C9D2);
+
+  /// Acento: crema (botones, selección). El texto encima va en [bg].
+  static const accent = Color(0xFFEDE7DC);
+
+  // Humo
+  static const smokeViolet = Color(0xFF4A2F9E);
+  static const smokeTeal = Color(0xFF0E5560);
+  static const smokeWine = Color(0xFF6B1A44);
+  static const smokeIndigo = Color(0xFF1D2C7A);
+  static const shimmer = [Color(0xFFE9E6F2), Color(0xFFB7A6FF), Color(0xFF7FD3C8), Color(0xFFE6B7D0)];
 
   static const radius = 22.0;
   static const fast = Duration(milliseconds: 220);
@@ -42,19 +53,14 @@ abstract final class DD {
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: bg,
-      colorScheme: const ColorScheme.dark(
-        surface: surface,
-        primary: ember,
-        onPrimary: Colors.white,
-        secondary: silver,
-      ),
+      colorScheme: const ColorScheme.dark(surface: solid, primary: accent, onPrimary: bg, secondary: silver),
       splashFactory: InkSparkle.splashFactory,
     );
     return base.copyWith(
       textTheme: GoogleFonts.manropeTextTheme(base.textTheme).apply(bodyColor: text, displayColor: text),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: surfaceHi,
+        backgroundColor: const Color(0xF21A1A1F),
         contentTextStyle: GoogleFonts.manrope(color: text, fontSize: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),

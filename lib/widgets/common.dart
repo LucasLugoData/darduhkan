@@ -138,14 +138,14 @@ class CartButton extends StatelessWidget {
                     constraints: const BoxConstraints(minWidth: 20),
                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     decoration: BoxDecoration(
-                      color: DD.ember,
+                      color: DD.accent,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: DD.bg, width: 2),
                     ),
                     child: Text(
                       '${order.count}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white),
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: DD.bg),
                     ),
                   ),
           ),
@@ -172,11 +172,11 @@ class PrimaryButton extends StatelessWidget {
         height: 58,
         padding: const EdgeInsets.symmetric(horizontal: 22),
         decoration: BoxDecoration(
-          color: onTap == null ? DD.surfaceHi : DD.ember,
+          color: onTap == null ? DD.surfaceHi : DD.accent,
           borderRadius: BorderRadius.circular(29),
           boxShadow: [
             if (onTap != null)
-              BoxShadow(color: DD.ember.withValues(alpha: 0.28), blurRadius: 24, offset: const Offset(0, 8)),
+              BoxShadow(color: DD.accent.withValues(alpha: 0.12), blurRadius: 28, offset: const Offset(0, 6)),
           ],
         ),
         child: AnimatedSwitcher(
@@ -185,7 +185,7 @@ class PrimaryButton extends StatelessWidget {
               ? const Center(
                   child: SizedBox.square(
                     dimension: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
+                    child: CircularProgressIndicator(strokeWidth: 2.4, color: DD.bg),
                   ),
                 )
               : Row(
@@ -198,18 +198,14 @@ class PrimaryButton extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
-                          color: onTap == null ? DD.textDim : Colors.white,
+                          color: onTap == null ? DD.textDim : DD.bg,
                         ),
                       ),
                     ),
                     if (trailing != null)
                       Text(
                         trailing!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: DD.bg),
                       ),
                   ],
                 ),
@@ -327,7 +323,7 @@ void toast(BuildContext context, String msg, {IconData icon = Icons.check_circle
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 96),
         content: Row(
           children: [
-            Icon(icon, color: DD.ember, size: 20),
+            Icon(icon, color: DD.accent, size: 20),
             const SizedBox(width: 10),
             Expanded(child: Text(msg)),
           ],

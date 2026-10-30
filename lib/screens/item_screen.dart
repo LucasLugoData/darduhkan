@@ -6,6 +6,7 @@ import '../state/order.dart';
 import '../theme.dart';
 import '../widgets/arch.dart';
 import '../widgets/common.dart';
+import '../widgets/smoke.dart';
 
 /// Ficha de producto con carrusel deslizable entre los productos de la categoría,
 /// al estilo de la referencia del café: el central crece, los laterales asoman.
@@ -72,45 +73,47 @@ class _ItemScreenState extends State<ItemScreen> {
   Widget build(BuildContext context) {
     final item = _item;
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: Row(
-                children: [
-                  RoundIconButton(icon: Icons.arrow_back, onTap: () => Navigator.of(context).pop()),
-                  Expanded(
-                    child: Text(
-                      item.category.name.toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: DD.brand(size: 13, spacing: 5),
-                    ),
-                  ),
-                  const CartButton(),
-                ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
+      body: Smoke(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: Row(
                   children: [
-                    const SizedBox(height: 20),
-                    _infoCards(item),
-                    const SizedBox(height: 18),
-                    _carousel(),
-                    const SizedBox(height: 8),
-                    _dots(),
-                    const SizedBox(height: 18),
-                    _titleBlock(item),
-                    _options(item),
+                    RoundIconButton(icon: Icons.arrow_back, onTap: () => Navigator.of(context).pop()),
+                    Expanded(
+                      child: Text(
+                        item.category.name.toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: DD.brand(size: 13, spacing: 5),
+                      ),
+                    ),
+                    const CartButton(),
                   ],
                 ),
               ),
-            ),
-            _bottomBar(),
-          ],
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      _infoCards(item),
+                      const SizedBox(height: 18),
+                      _carousel(),
+                      const SizedBox(height: 8),
+                      _dots(),
+                      const SizedBox(height: 18),
+                      _titleBlock(item),
+                      _options(item),
+                    ],
+                  ),
+                ),
+              ),
+              _bottomBar(),
+            ],
+          ),
         ),
       ),
     );
@@ -134,7 +137,7 @@ class _ItemScreenState extends State<ItemScreen> {
                 decoration: BoxDecoration(
                   color: DD.surface,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: DD.line.withValues(alpha: 0.7)),
+                  border: Border.all(color: DD.line),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +222,7 @@ class _ItemScreenState extends State<ItemScreen> {
               curve: DD.curve,
               widthFactor: 1 / n,
               alignment: Alignment(n == 1 ? 0 : -1 + 2 * _index / (n - 1), 0),
-              child: Container(color: DD.ember),
+              child: Container(color: DD.accent),
             ),
           ],
         ),

@@ -5,6 +5,7 @@ import '../state/order.dart';
 import '../theme.dart';
 import '../widgets/arch.dart';
 import '../widgets/common.dart';
+import '../widgets/smoke.dart';
 import 'confirmation_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -51,38 +52,41 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     final order = OrderScope.of(context);
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: Row(
-                children: [
-                  RoundIconButton(
-                    icon: Icons.keyboard_arrow_down_rounded,
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text('TU PEDIDO', style: DD.brand(size: 13, spacing: 5)),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Mesa ${order.table ?? '-'}',
-                          style: const TextStyle(color: DD.textDim, fontSize: 12.5),
-                        ),
-                      ],
+      body: Smoke(
+        intensity: 0.7,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: Row(
+                  children: [
+                    RoundIconButton(
+                      icon: Icons.keyboard_arrow_down_rounded,
+                      onTap: () => Navigator.of(context).pop(),
                     ),
-                  ),
-                  const SizedBox(width: 46),
-                ],
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text('TU PEDIDO', style: DD.brand(size: 13, spacing: 5)),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Mesa ${order.table ?? '-'}',
+                            style: const TextStyle(color: DD.textDim, fontSize: 12.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 46),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: AnimatedSwitcher(duration: DD.medium, child: order.isEmpty ? _empty() : _list(order)),
-            ),
-            if (!order.isEmpty) _summary(order),
-          ],
+              Expanded(
+                child: AnimatedSwitcher(duration: DD.medium, child: order.isEmpty ? _empty() : _list(order)),
+              ),
+              if (!order.isEmpty) _summary(order),
+            ],
+          ),
         ),
       ),
     );
@@ -136,10 +140,10 @@ class _CartScreenState extends State<CartScreen> {
                 padding: const EdgeInsets.only(right: 24),
                 alignment: Alignment.centerRight,
                 decoration: BoxDecoration(
-                  color: DD.ember.withValues(alpha: 0.15),
+                  color: DD.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(DD.radius),
                 ),
-                child: const Icon(Icons.delete_outline, color: DD.ember),
+                child: const Icon(Icons.delete_outline, color: DD.accent),
               ),
               child: _LineTile(line: line, order: order),
             ),
@@ -237,7 +241,7 @@ class _LineTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: DD.surface,
         borderRadius: BorderRadius.circular(DD.radius),
-        border: Border.all(color: DD.line.withValues(alpha: 0.6)),
+        border: Border.all(color: DD.line),
       ),
       child: Row(
         children: [

@@ -10,10 +10,12 @@ y envía el pedido a barra.
 
 ## Diseño
 
-- **Oscuro y minimalista**: negro profundo, plata de la marca y un único acento brasa (naranja salmón).
+- **Oscuro y minimalista**: negro con humo de color (violeta, petróleo y vino muy oscuros) que se
+  mueve despacio detrás de todo, tarjetas de cristal translúcido y un único acento crema sobre negro.
+- Títulos clave (marca, "esta noche?", confirmación) con un degradado plata-lavanda-petróleo animado.
 - **El arco de la marca** como elemento de sistema: logo animado, selector de mesa, ilustraciones de
   producto y confirmación usan la misma silueta.
-- **Animaciones**: arco que se dibuja al entrar, carrusel de productos con escala/opacidad,
+- **Animaciones**: humo de fondo continuo entre pantallas, arco que se dibuja al entrar, carrusel de productos con escala/opacidad,
   listas escalonadas, contador del pedido, barra de pedido que entra con rebote, check final.
 - Tipografía: Manrope (texto), Josefin Sans (marca), Cormorant Garamond itálica (títulos, eco de la carta).
   Las fuentes van empaquetadas en `assets/google_fonts/` (licencia OFL), así funciona sin internet.

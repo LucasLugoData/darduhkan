@@ -5,6 +5,7 @@ import '../state/order.dart';
 import '../theme.dart';
 import '../widgets/arch.dart';
 import '../widgets/common.dart';
+import '../widgets/smoke.dart';
 import 'menu_screen.dart';
 
 const _tables = 30;
@@ -62,85 +63,88 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, c) {
-            final archW = (c.maxWidth * 0.5).clamp(160.0, 230.0);
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: c.maxHeight),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(height: 32),
-                    AnimatedBuilder(
-                      animation: _intro,
-                      builder: (_, _) => SizedBox(
-                        width: archW,
-                        height: archW * 1.3,
-                        child: CustomPaint(
-                          painter: ArchOutlinePainter(progress: _draw.value, stroke: 2.4),
-                          child: Opacity(
-                            opacity: _logo.value,
-                            child: Transform.scale(
-                              scale: 0.85 + 0.15 * _logo.value,
-                              child: Align(
-                                alignment: const Alignment(0, 0.35),
-                                child: CustomPaint(
-                                  size: Size(archW * 0.32, archW * 0.52),
-                                  painter: HookahPainter(),
+      body: Smoke(
+        intensity: 1.2,
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, c) {
+              final archW = (c.maxWidth * 0.5).clamp(160.0, 230.0);
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: c.maxHeight),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(height: 32),
+                      AnimatedBuilder(
+                        animation: _intro,
+                        builder: (_, _) => SizedBox(
+                          width: archW,
+                          height: archW * 1.3,
+                          child: CustomPaint(
+                            painter: ArchOutlinePainter(progress: _draw.value, stroke: 2.4),
+                            child: Opacity(
+                              opacity: _logo.value,
+                              child: Transform.scale(
+                                scale: 0.85 + 0.15 * _logo.value,
+                                child: Align(
+                                  alignment: const Alignment(0, 0.35),
+                                  child: CustomPaint(
+                                    size: Size(archW * 0.32, archW * 0.52),
+                                    painter: HookahPainter(),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    FadeTransition(
-                      opacity: _logo,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 28),
-                          Text('DAR DUKHAN', style: DD.brand(size: 26, spacing: 9)),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Bar · Shisha · Lounge',
-                            style: TextStyle(color: DD.textDim, letterSpacing: 2, fontSize: 13),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 40),
-                    FadeSlideIn(
-                      delay: const Duration(milliseconds: 1300),
-                      child: Column(
-                        children: [
-                          Text('¿En qué mesa estás?', style: DD.script(size: 26)),
-                          const SizedBox(height: 18),
-                          _tablePicker(),
-                          const SizedBox(height: 28),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: PrimaryButton(
-                              label: 'Ver la carta',
-                              trailing: 'Mesa $_table',
-                              onTap: _enter,
+                      FadeTransition(
+                        opacity: _logo,
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 28),
+                            ShimmerText('DAR DUKHAN', style: DD.brand(size: 26, spacing: 9)),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Bar · Shisha · Lounge',
+                              style: TextStyle(color: DD.textDim, letterSpacing: 2, fontSize: 13),
                             ),
-                          ),
-                          const SizedBox(height: 18),
-                          Text(
-                            'Alcohol y shisha solo para mayores de 18 años',
-                            style: TextStyle(color: DD.textDim.withValues(alpha: 0.7), fontSize: 12),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 40),
+                      FadeSlideIn(
+                        delay: const Duration(milliseconds: 1300),
+                        child: Column(
+                          children: [
+                            Text('¿En qué mesa estás?', style: DD.script(size: 26)),
+                            const SizedBox(height: 18),
+                            _tablePicker(),
+                            const SizedBox(height: 28),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                              child: PrimaryButton(
+                                label: 'Ver la carta',
+                                trailing: 'Mesa $_table',
+                                onTap: _enter,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Text(
+                              'Alcohol y shisha solo para mayores de 18 años',
+                              style: TextStyle(color: DD.textDim.withValues(alpha: 0.7), fontSize: 12),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -180,7 +184,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                       alignment: Alignment.center,
                       decoration: ShapeDecoration(
                         shape: const _ArchShape(),
-                        color: selected ? DD.ember : DD.surface,
+                        color: selected ? DD.accent : DD.surface,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.only(top: 14),
@@ -189,7 +193,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: selected ? Colors.white : DD.textDim,
+                            color: selected ? DD.bg : DD.textDim,
                           ),
                         ),
                       ),
