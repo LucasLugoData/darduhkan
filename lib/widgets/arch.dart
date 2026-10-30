@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:material_ui/material_ui.dart';
 
 import '../data/models.dart';
+import '../data/product_images.g.dart';
 import '../theme.dart';
 
 /// Arco de herradura apuntado, la silueta de la marca Dar Dukhan.
@@ -135,34 +136,62 @@ class ItemArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tint = item.category.tint;
+    final hasPhoto = productImages.contains(item.imageKey);
     final glyph = size.width * 0.46;
-    return SizedBox.fromSize(
-      size: size,
-      child: ClipPath(
-        clipper: const ArchClipper(),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: const Alignment(0, 0.35),
-              radius: 0.95,
-              colors: [
-                tint.withValues(alpha: 0.42 * glow),
-                tint.withValues(alpha: 0.10 * glow),
-                DD.surfaceHi,
-              ],
-              stops: const [0, 0.55, 1],
-            ),
-          ),
-          child: Align(
-            alignment: const Alignment(0, 0.4),
-            child: item.category.art == ArtKind.hookah
-                ? CustomPaint(
-                    size: Size(glyph * 0.62, glyph),
-                    painter: HookahPainter(color: DD.text.withValues(alpha: 0.92)),
-                  )
-                : Icon(item.icon, size: glyph, color: DD.text.withValues(alpha: 0.92)),
+    final arch = ClipPath(
+      clipper: const ArchClipper(),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0, 0.35),
+            radius: 0.95,
+            colors: [
+              tint.withValues(alpha: 0.42 * glow),
+              tint.withValues(alpha: 0.10 * glow),
+              DD.surfaceHi,
+            ],
+            stops: const [0, 0.55, 1],
           ),
         ),
+        child: hasPhoto
+            ? const SizedBox.expand()
+            : Align(
+                alignment: const Alignment(0, 0.4),
+                child: item.category.art == ArtKind.hookah
+                    ? CustomPaint(
+                        size: Size(glyph * 0.62, glyph),
+                        painter: HookahPainter(color: DD.text.withValues(alpha: 0.92)),
+                      )
+                    : Icon(item.icon, size: glyph, color: DD.text.withValues(alpha: 0.92)),
+              ),
+      ),
+    );
+    if (!hasPhoto) return SizedBox.fromSize(size: size, child: arch);
+
+    // La foto (PNG/WebP transparente) se posa sobre el arco y asoma un poco por los lados,
+    // como los platos de las referencias.
+    final over = size.width * 0.1;
+    return SizedBox.fromSize(
+      size: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(child: arch),
+          Positioned(
+            left: -over,
+            right: -over,
+            bottom: size.height * 0.03,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Image.asset(
+                'assets/products/${item.imageKey}.webp',
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.medium,
+                cacheWidth: (size.width * 2.4).round(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

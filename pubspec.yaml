@@ -63,6 +63,7 @@ flutter:
   # Fuentes empaquetadas: la carta funciona aunque el wifi del local falle.
   assets:
     - assets/google_fonts/
+    - assets/products/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

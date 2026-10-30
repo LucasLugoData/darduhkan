@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dar_dukhan/data/menu_data.dart';
+import 'package:dar_dukhan/data/product_images.g.dart';
 import 'package:dar_dukhan/state/order.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,5 +31,14 @@ void main() {
       expect(itemsOf(c), isNotEmpty);
     }
     expect(menu.map((i) => i.id).toSet().length, menu.length);
+  });
+
+  test('cada foto de producto tiene prompt y las del índice existen', () {
+    final prompts = jsonDecode(File('tool/image_prompts.json').readAsStringSync()) as Map<String, dynamic>;
+    final keys = menu.map((i) => i.imageKey).toSet();
+    expect(keys.difference(prompts.keys.toSet()), isEmpty);
+    for (final k in productImages) {
+      expect(File('assets/products/$k.webp').existsSync(), isTrue, reason: k);
+    }
   });
 }

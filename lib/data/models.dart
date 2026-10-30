@@ -40,6 +40,7 @@ class MenuItem {
     this.tag = '',
     this.variants = const [],
     this.extras = const [],
+    required this.imageKey,
   });
 
   final String id;
@@ -56,6 +57,10 @@ class MenuItem {
   final String tag;
   final List<String> variants;
   final List<Extra> extras;
+
+  /// Clave de la foto en `assets/products/<imageKey>.webp`. Varios productos
+  /// pueden compartirla (p. ej. todas las copas de whisky).
+  final String imageKey;
 
   bool get needsChoice => variants.isNotEmpty;
 }

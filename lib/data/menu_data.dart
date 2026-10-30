@@ -67,6 +67,18 @@ const categories = [shishas, comida, cocteles, copas, cervezas, bebidas, botella
 const _extraHead = Extra('Cabeza extra', 500);
 const _premium = Extra('Red Bull / Premium', 100);
 
+/// `"Piña Colada"` → `"pina-colada"`.
+String slug(String s) {
+  const from = 'áéíóúüñàèìòùâêîôûäëïöçî';
+  const to = 'aeiouunaeiouaeiouaeioci';
+  final b = StringBuffer();
+  for (final ch in s.toLowerCase().split('')) {
+    final i = from.indexOf(ch);
+    b.write(i >= 0 ? to[i] : ch);
+  }
+  return b.toString().replaceAll(RegExp(r'[^a-z0-9]+'), '-').replaceAll(RegExp(r'^-|-$'), '');
+}
+
 MenuItem _i(
   Category c,
   String section,
@@ -77,8 +89,10 @@ MenuItem _i(
   String tag = '',
   List<String> variants = const [],
   List<Extra> extras = const [],
+  String? image,
 }) => MenuItem(
-  id: '${c.id}-${section.toLowerCase()}-${name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '-')}',
+  id: '${c.id}-${slug(section)}-${slug(name)}',
+  imageKey: image ?? '${c.id}-${slug(name)}',
   name: name,
   price: price,
   category: c,
@@ -106,8 +120,17 @@ MenuItem _food(
   String desc = '',
   List<String> variants = const [],
   IconData? icon,
-}) =>
-    _i(comida, 'Tapas y bocadillos', name, price, desc: desc, tag: 'Cocina', variants: variants, icon: icon);
+}) => _i(
+  comida,
+  'Tapas y bocadillos',
+  name,
+  price,
+  desc: desc,
+  tag: 'Cocina',
+  variants: variants,
+  icon: icon,
+  image: name.startsWith('Croquetas') ? 'comida-croquetas' : null,
+);
 
 MenuItem _cocktail(String name, int price, String desc, {bool alcohol = true}) => _i(
   cocteles,
@@ -117,13 +140,30 @@ MenuItem _cocktail(String name, int price, String desc, {bool alcohol = true}) =
   desc: desc,
   tag: alcohol ? 'Con alcohol' : 'Sin alcohol',
   icon: alcohol ? Icons.local_bar_outlined : Icons.local_drink_outlined,
+  // Con y sin alcohol se ven igual en el vaso: comparten foto.
+  image: 'cocteles-${slug(name)}',
 );
 
-MenuItem _copa(String section, String name, int price) =>
-    _i(copas, section, name, price, tag: section, extras: const [_premium], desc: 'Copa · $section');
+MenuItem _copa(String section, String name, int price) => _i(
+  copas,
+  section,
+  name,
+  price,
+  tag: section,
+  extras: const [_premium],
+  desc: 'Copa · $section',
+  image: 'copas-${slug(section)}',
+);
 
-MenuItem _beer(String name, int price, {String tag = 'Cerveza', IconData? icon}) =>
-    _i(cervezas, 'Cervezas', name, price, tag: tag, icon: icon);
+MenuItem _beer(String name, int price, {String tag = 'Cerveza', IconData? icon}) => _i(
+  cervezas,
+  'Cervezas',
+  name,
+  price,
+  tag: tag,
+  icon: icon,
+  image: tag == 'Vino' ? 'cervezas-vino' : 'cervezas-cerveza',
+);
 
 MenuItem _drink(
   String name,
@@ -133,8 +173,16 @@ MenuItem _drink(
   IconData? icon,
 }) => _i(bebidas, 'Bebidas', name, price, desc: desc, tag: 'Sin alcohol', variants: variants, icon: icon);
 
-MenuItem _bottle(String name, int price) =>
-    _i(botellas, 'Botellas', name, price * 100, tag: 'Botella', desc: 'Botella para la mesa');
+/// Foto genérica por tipo de destilado: sin marcas ni etiquetas reales.
+MenuItem _bottle(String name, int price, String kind) => _i(
+  botellas,
+  'Botellas',
+  name,
+  price * 100,
+  tag: 'Botella',
+  desc: 'Botella para la mesa',
+  image: 'botellas-$kind',
+);
 
 final List<MenuItem> menu = [
   // Shishas
@@ -319,34 +367,34 @@ final List<MenuItem> menu = [
   _drink('Ginger Ale', 400, icon: Icons.local_drink_outlined),
 
   // Botellas
-  _bottle('Belvedere', 150),
-  _bottle('Grey Goose', 150),
-  _bottle('J.W. Gold', 150),
-  _bottle('Puerto de Indias', 100),
-  _bottle('J.W. Black', 100),
-  _bottle("Jack Daniel's", 100),
-  _bottle('Chivas', 100),
-  _bottle('Matusalem', 100),
-  _bottle('Bombay Sapphire', 100),
-  _bottle('Bulldog', 100),
-  _bottle('Absolut', 90),
-  _bottle('J&B', 90),
-  _bottle("Ballantine's", 90),
-  _bottle('J.W. Red', 90),
-  _bottle('Four Roses', 90),
-  _bottle('Beefeater', 90),
-  _bottle("Seagram's", 90),
-  _bottle('Barceló', 90),
-  _bottle('Brugal', 90),
-  _bottle('Habana 7', 90),
-  _bottle('Negrita', 90),
-  _bottle('Santa Teresa', 90),
-  _bottle('Cacique', 90),
-  _bottle('Tequila', 90),
-  _bottle('Licor 43', 90),
-  _bottle('Jägermeister', 90),
-  _bottle('Moët Ice', 90),
-  _bottle('Botella de Vino', 15),
+  _bottle('Belvedere', 150, 'vodka'),
+  _bottle('Grey Goose', 150, 'vodka'),
+  _bottle('J.W. Gold', 150, 'whisky'),
+  _bottle('Puerto de Indias', 100, 'ginebra'),
+  _bottle('J.W. Black', 100, 'whisky'),
+  _bottle("Jack Daniel's", 100, 'whisky'),
+  _bottle('Chivas', 100, 'whisky'),
+  _bottle('Matusalem', 100, 'ron'),
+  _bottle('Bombay Sapphire', 100, 'ginebra'),
+  _bottle('Bulldog', 100, 'ginebra'),
+  _bottle('Absolut', 90, 'vodka'),
+  _bottle('J&B', 90, 'whisky'),
+  _bottle("Ballantine's", 90, 'whisky'),
+  _bottle('J.W. Red', 90, 'whisky'),
+  _bottle('Four Roses', 90, 'whisky'),
+  _bottle('Beefeater', 90, 'ginebra'),
+  _bottle("Seagram's", 90, 'ginebra'),
+  _bottle('Barceló', 90, 'ron'),
+  _bottle('Brugal', 90, 'ron'),
+  _bottle('Habana 7', 90, 'ron'),
+  _bottle('Negrita', 90, 'ron'),
+  _bottle('Santa Teresa', 90, 'ron'),
+  _bottle('Cacique', 90, 'ron'),
+  _bottle('Tequila', 90, 'tequila'),
+  _bottle('Licor 43', 90, 'licor'),
+  _bottle('Jägermeister', 90, 'licor'),
+  _bottle('Moët Ice', 90, 'champan'),
+  _bottle('Botella de Vino', 15, 'vino'),
 ];
 
 List<MenuItem> itemsOf(Category c) => menu.where((i) => i.category == c).toList();

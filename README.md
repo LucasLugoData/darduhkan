@@ -41,6 +41,22 @@ flutter run -d chrome       # web (p. ej. http://localhost:xxxx/?mesa=7)
 flutter test
 ```
 
+## Fotos de producto (fondo transparente)
+
+Las fotos se generan con la API de imágenes de OpenAI (el modelo que usa Codex), con
+`background: transparent`. Cada producto tiene una clave de foto (`imageKey`); las copas y las
+botellas comparten foto por tipo y no llevan marcas reales.
+
+```bash
+export OPENAI_API_KEY=...                      # variable de entorno, nunca en el repo
+python3 tool/generate_images.py                # genera solo las que faltan (88 en total)
+python3 tool/generate_images.py --only shishas-zeus --force   # rehacer una
+```
+
+- Los prompts están en `tool/image_prompts.json` (edítalos para ajustar el estilo).
+- Salida: `assets/products/<clave>.webp` a 512 px, recortadas al contenido, y el índice
+  `lib/data/product_images.g.dart`. Mientras falte una foto, la app muestra el icono en el arco.
+
 ## Pendiente
 
 - **Envío real a barra**: `Order.submit()` hoy simula el envío. Falta conectar un backend
