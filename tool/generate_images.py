@@ -6,6 +6,11 @@ de OpenAI (el mismo modelo que usa Codex para crear imágenes).
     python3 tool/generate_images.py      # genera solo las que faltan
     python3 tool/generate_images.py --only shishas-zeus copas-ron --force
 
+Si las imágenes se crean con otra herramienta (p. ej. Codex), guárdalas como
+PNG transparentes con el nombre de su clave (`<clave>.png`) y procésalas:
+
+    python3 tool/generate_images.py --import tool/raw
+
 Salida: assets/products/<clave>.webp (512 px, recortadas al contenido) y
 lib/data/product_images.g.dart con las claves disponibles.
 Requiere Pillow (pip install pillow).
@@ -99,9 +104,22 @@ def main() -> None:
     ap.add_argument("--quality", default="medium", choices=["low", "medium", "high"])
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--index-only", action="store_true", help="solo regenerar el índice Dart")
+    ap.add_argument("--import", dest="import_dir", help="procesar PNG ya generados (<clave>.png)")
     args = ap.parse_args()
 
     if args.index_only:
+        return write_index()
+    if args.import_dir:
+        prompts = json.loads(PROMPTS.read_text())
+        for f in sorted(Path(args.import_dir).glob("*.png")):
+            if f.stem not in prompts:
+                print(f"  ? {f.name}: clave desconocida, se ignora", file=sys.stderr)
+                continue
+            save(f.stem, f.read_bytes())
+            print(f"  ✓ {f.stem}")
+        missing = [k for k in prompts if not (OUT / f"{k}.webp").exists()]
+        if missing:
+            print(f"Faltan {len(missing)}: {' '.join(missing)}")
         return write_index()
     if "OPENAI_API_KEY" not in os.environ:
         sys.exit("Falta OPENAI_API_KEY en el entorno.")
