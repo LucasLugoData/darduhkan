@@ -3,6 +3,7 @@
 /// Fotos de producto disponibles en `assets/products/`.
 const productImages = <String>{
   'cocteles-pina-colada',
-  'shisha-cachimba',
+  'menu-ensalada',
+  'menu-patatas',
   'shishas-black-widow',
 };

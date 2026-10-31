@@ -69,14 +69,17 @@ const _premium = Extra('Red Bull / Premium', 100);
 
 /// Menú al estilo fast food: plato + acompañamiento + bebida por un suplemento.
 const comboPrice = 350;
-const comboSides = ['Patatas', 'Ensalada'];
+const comboSides = [
+  ComboOption('Patatas', 'menu-patatas', Icons.fastfood_outlined),
+  ComboOption('Ensalada', 'menu-ensalada', Icons.eco_outlined),
+];
 const comboDrinks = [
-  Extra('Refresco', 0),
-  Extra('Agua', 0),
-  Extra('Zumo', 0),
-  Extra('Poms', 0),
-  Extra('Ginger Ale', 0),
-  Extra('Red Bull', 100),
+  ComboOption('Refresco', 'bebidas-refrescos', Icons.local_drink_outlined),
+  ComboOption('Agua', 'bebidas-vichy-catalan', Icons.water_drop_outlined),
+  ComboOption('Zumo', 'bebidas-zumos', Icons.local_drink_outlined),
+  ComboOption('Poms', 'bebidas-poms', Icons.local_drink_outlined),
+  ComboOption('Ginger Ale', 'bebidas-ginger-ale', Icons.local_drink_outlined),
+  ComboOption('Red Bull', 'bebidas-red-bull', Icons.bolt_outlined, 100),
 ];
 
 /// `"Piña Colada"` → `"pina-colada"`.

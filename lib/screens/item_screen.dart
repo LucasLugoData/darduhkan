@@ -5,9 +5,9 @@ import '../data/models.dart';
 import '../state/order.dart';
 import '../theme.dart';
 import '../widgets/arch.dart';
-import '../widgets/combo_sheet.dart';
 import '../widgets/common.dart';
 import '../widgets/smoke.dart';
+import 'combo_screen.dart';
 
 /// Ficha de producto con carrusel deslizable entre los productos de la categoría,
 /// al estilo de la referencia del café: el central crece, los laterales asoman.
@@ -67,7 +67,7 @@ class _ItemScreenState extends State<ItemScreen> {
     var combo = const <String>[];
     var comboPrice = 0;
     if (item.combo) {
-      final r = await ComboSheet.show(context, item, _unit);
+      final r = await ComboScreen.show(context, item, _unit);
       if (r == null || !mounted) return;
       (combo: combo, price: comboPrice) = r;
     }

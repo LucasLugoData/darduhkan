@@ -11,6 +11,9 @@ PNG transparentes con el nombre de su clave (`<clave>.png`) y procésalas:
 
     python3 tool/generate_images.py --import tool/raw
 
+Las shishas se generan pasando tool/ref/shisha-cachimba.png como imagen de
+referencia, para que la cachimba sea la misma en todas.
+
 Salida: assets/products/<clave>.webp (512 px, recortadas al contenido) y
 lib/data/product_images.g.dart con las claves disponibles.
 Requiere Pillow (pip install pillow).
@@ -82,21 +85,18 @@ def clean_edges(img: Image.Image) -> None:
     img.putalpha(ImageChops.multiply(soft, a.point(lambda v: min(255, v * 255 // 250))))
 
 
-def glass_translucency(img: Image.Image) -> None:
-    """El generador deja opaco el cristal de la cachimba. En la mitad inferior,
-    los grises medios poco saturados (el vaso) pasan a semitransparentes para
-    que se vean las frutas de detrás; el metal negro y los brillos se quedan."""
-    w, h = img.size
-    hsv = img.convert("RGB").convert("HSV")
-    mask = Image.new("L", img.size, 255)
-    px, hv = mask.load(), hsv.load()
-    for y in range(int(h * 0.58), h):
+def body_center(img: Image.Image) -> float:
+    """Centro horizontal del cuerpo del producto: centro de masa del alfa en la
+    mitad inferior, para que adornos laterales (piña, manguera) no lo descentren."""
+    a = img.getchannel("A")
+    w, h = a.size
+    cols = [0] * w
+    px = a.load()
+    for y in range(h // 2, h):
         for x in range(w):
-            _, s, v = hv[x, y]
-            if 50 < v < 215 and s < 90:
-                px[x, y] = 120
-    mask = mask.filter(ImageFilter.GaussianBlur(3))
-    img.putalpha(ImageChops.multiply(img.getchannel("A"), mask))
+            cols[x] += px[x, y]
+    total = sum(cols)
+    return sum(x * c for x, c in enumerate(cols)) / total if total else w / 2
 
 
 def save(key: str, png: bytes) -> None:
@@ -104,15 +104,16 @@ def save(key: str, png: bytes) -> None:
     if img.getchannel("A").getextrema()[0] == 255:
         print(f"  ! {key}: la imagen no trae transparencia", file=sys.stderr)
     clean_edges(img)
-    if key == "shisha-cachimba":
-        glass_translucency(img)
     bbox = img.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox()
     if bbox:
         img = img.crop(bbox)
-    # Cuadrado con un pequeño margen, apoyado abajo (se ve "posado" sobre el arco).
-    side = int(max(img.size) * 1.06)
+    # Cuadrado con un pequeño margen, apoyado abajo (se ve "posado" sobre el arco)
+    # y centrado por el cuerpo del producto, no por su caja.
+    cx = body_center(img)
+    half = max(cx, img.width - cx)
+    side = int(max(2 * half, img.height) * 1.06)
     canvas = Image.new("RGBA", (side, side), (0, 0, 0, 0))
-    canvas.paste(img, ((side - img.width) // 2, side - img.height - int(side * 0.02)), img)
+    canvas.paste(img, (int(side / 2 - cx), side - img.height - int(side * 0.02)), img)
     canvas = canvas.resize((512, 512), Image.LANCZOS)
     OUT.mkdir(parents=True, exist_ok=True)
     canvas.save(OUT / f"{key}.webp", "WEBP", quality=86, method=6)

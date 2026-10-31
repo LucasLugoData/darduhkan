@@ -28,6 +28,17 @@ class Extra {
   final int price;
 }
 
+/// Opción a elegir dentro de un menú (acompañamiento o bebida).
+class ComboOption {
+  const ComboOption(this.name, this.imageKey, this.icon, [this.price = 0]);
+  final String name;
+  final String imageKey;
+  final IconData icon;
+
+  /// Suplemento sobre el precio del menú, en céntimos.
+  final int price;
+}
+
 class MenuItem {
   const MenuItem({
     required this.id,

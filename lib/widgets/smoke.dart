@@ -111,6 +111,55 @@ class _SmokePainter extends CustomPainter {
   bool shouldRepaint(_SmokePainter old) => old.intensity != intensity;
 }
 
+/// Humo que sale de la cazoleta de la cachimba: bocanadas suaves que suben,
+/// se ensanchan, se mecen y se desvanecen. [origin] va en fracciones del tamaño.
+class HookahWisp extends StatefulWidget {
+  const HookahWisp({super.key, this.origin = const Offset(0.5, 0.06)});
+  final Offset origin;
+
+  @override
+  State<HookahWisp> createState() => _HookahWispState();
+}
+
+class _HookahWispState extends State<HookahWisp> with SingleTickerProviderStateMixin, _TimeTicker {
+  @override
+  Widget build(BuildContext context) =>
+      IgnorePointer(child: RepaintBoundary(child: CustomPaint(painter: _WispPainter(time, widget.origin))));
+}
+
+class _WispPainter extends CustomPainter {
+  _WispPainter(this.time, this.origin) : super(repaint: time);
+  final ValueNotifier<double> time;
+  final Offset origin;
+
+  static const _puffs = 9;
+  static const _period = 5.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final u = size.width;
+    final o = Offset(size.width * origin.dx, size.height * origin.dy);
+    for (var i = 0; i < _puffs; i++) {
+      final p = ((time.value / _period) + i / _puffs) % 1;
+      // Aparece rápido, se apaga despacio.
+      final alpha = math.sin(math.pi * math.pow(p, 0.6)) * 0.16;
+      final sway = math.sin(time.value * 0.9 + i * 1.3) * u * 0.05 * p;
+      final c = o + Offset(sway + u * 0.04 * p, -u * 0.42 * Curves.easeOutSine.transform(p));
+      final r = u * (0.025 + 0.11 * p);
+      canvas.drawCircle(
+        c,
+        r,
+        Paint()
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.6)
+          ..color = DD.text.withValues(alpha: alpha),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_WispPainter old) => old.origin != origin;
+}
+
 /// Texto con un degradado plata → lavanda → petróleo que se desliza.
 class ShimmerText extends StatefulWidget {
   const ShimmerText(this.text, {super.key, required this.style, this.textAlign});
