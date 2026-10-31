@@ -125,6 +125,9 @@ class HookahPainter extends CustomPainter {
   bool shouldRepaint(HookahPainter old) => old.color != color;
 }
 
+/// Foto de la cachimba común que se superpone a las frutas de cada shisha.
+const hookahImage = 'shisha-cachimba';
+
 /// Ilustración de un producto: arco con brillo del color de su categoría.
 class ItemArt extends StatelessWidget {
   const ItemArt({super.key, required this.item, this.size = const Size(56, 66), this.glow = 1});
@@ -171,6 +174,15 @@ class ItemArt extends StatelessWidget {
     // La foto (PNG/WebP transparente) se posa sobre el arco y asoma un poco por los lados,
     // como los platos de las referencias.
     final over = size.width * 0.1;
+    Widget photo(String key) => Image.asset(
+      'assets/products/$key.webp',
+      fit: BoxFit.contain,
+      alignment: Alignment.bottomCenter,
+      filterQuality: FilterQuality.medium,
+      cacheWidth: (size.width * 2.4).round(),
+    );
+    // Shishas: la misma cachimba para todas, encima de las frutas de cada sabor.
+    final hookah = item.category.art == ArtKind.hookah && productImages.contains(hookahImage);
     return SizedBox.fromSize(
       size: size,
       child: Stack(
@@ -183,12 +195,22 @@ class ItemArt extends StatelessWidget {
             bottom: size.height * 0.03,
             child: AspectRatio(
               aspectRatio: 1,
-              child: Image.asset(
-                'assets/products/${item.imageKey}.webp',
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.medium,
-                cacheWidth: (size.width * 2.4).round(),
-              ),
+              child: hookah
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        photo(item.imageKey),
+                        FractionallySizedBox(
+                          heightFactor: 0.94,
+                          alignment: Alignment.bottomCenter,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: size.height * 0.04),
+                            child: photo(hookahImage),
+                          ),
+                        ),
+                      ],
+                    )
+                  : photo(item.imageKey),
             ),
           ),
         ],

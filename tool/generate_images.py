@@ -27,7 +27,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 PROMPTS = ROOT / "tool" / "image_prompts.json"
@@ -71,10 +71,41 @@ def generate(key: str, subject: str, model: str, quality: str) -> bytes:
     return base64.b64decode(data["data"][0]["b64_json"])
 
 
+def clean_edges(img: Image.Image) -> None:
+    """El generador recorta a cuchillo (alfa 0/≈255) y deja un halo del fondo:
+    se come 1 px del borde y se suaviza el contorno para que no haga sierra."""
+    a = img.getchannel("A")
+    solid = a.point(lambda v: 255 if v > 128 else 0)
+    soft = solid.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(2.6))
+    soft = soft.point(lambda v: max(0, min(255, int((v - 128) * 1.8 + 128))))
+    # Conserva la translucidez que sí traiga la imagen (cristal, humo).
+    img.putalpha(ImageChops.multiply(soft, a.point(lambda v: min(255, v * 255 // 250))))
+
+
+def glass_translucency(img: Image.Image) -> None:
+    """El generador deja opaco el cristal de la cachimba. En la mitad inferior,
+    los grises medios poco saturados (el vaso) pasan a semitransparentes para
+    que se vean las frutas de detrás; el metal negro y los brillos se quedan."""
+    w, h = img.size
+    hsv = img.convert("RGB").convert("HSV")
+    mask = Image.new("L", img.size, 255)
+    px, hv = mask.load(), hsv.load()
+    for y in range(int(h * 0.58), h):
+        for x in range(w):
+            _, s, v = hv[x, y]
+            if 50 < v < 215 and s < 90:
+                px[x, y] = 120
+    mask = mask.filter(ImageFilter.GaussianBlur(3))
+    img.putalpha(ImageChops.multiply(img.getchannel("A"), mask))
+
+
 def save(key: str, png: bytes) -> None:
     img = Image.open(io.BytesIO(png)).convert("RGBA")
     if img.getchannel("A").getextrema()[0] == 255:
         print(f"  ! {key}: la imagen no trae transparencia", file=sys.stderr)
+    clean_edges(img)
+    if key == "shisha-cachimba":
+        glass_translucency(img)
     bbox = img.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox()
     if bbox:
         img = img.crop(bbox)
