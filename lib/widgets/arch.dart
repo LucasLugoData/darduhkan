@@ -146,8 +146,8 @@ class ItemArt extends StatelessWidget {
             center: const Alignment(0, 0.35),
             radius: 0.95,
             colors: [
-              tint.withValues(alpha: 0.42 * glow),
-              tint.withValues(alpha: 0.10 * glow),
+              tint.withValues(alpha: 0.5 * glow),
+              tint.withValues(alpha: 0.12 * glow),
               DD.surfaceHi,
             ],
             stops: const [0, 0.55, 1],

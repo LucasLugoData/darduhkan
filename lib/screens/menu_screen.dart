@@ -308,7 +308,7 @@ class _MenuScreenState extends State<MenuScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [c.tint.withValues(alpha: 0.16), DD.surface],
+              colors: [c.tint.withValues(alpha: 0.22), DD.surface],
             ),
             border: Border.all(color: DD.line),
           ),
@@ -334,7 +334,12 @@ class _MenuScreenState extends State<MenuScreen> {
                     const SizedBox(height: 12),
                     Text(
                       '${itemsOf(c).length} opciones',
-                      style: TextStyle(color: c.tint, fontWeight: FontWeight.w700, fontSize: 12),
+                      style: const TextStyle(
+                        color: DD.textDim,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ],
                 ),

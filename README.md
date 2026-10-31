@@ -10,9 +10,9 @@ y envía el pedido a barra.
 
 ## Diseño
 
-- **Oscuro y minimalista**: negro con humo de color (violeta, petróleo y vino muy oscuros) que se
+- **Oscuro y minimalista**: negro con humo casi negro (violeta, petróleo y vino muy apagados) que se
   mueve despacio detrás de todo, tarjetas de cristal translúcido y un único acento crema sobre negro.
-- Títulos clave (marca, "esta noche?", confirmación) con un degradado plata-lavanda-petróleo animado.
+- Títulos clave (marca, "esta noche?", confirmación) con un brillo plateado animado, como el marco de la carta.
 - **El arco de la marca** como elemento de sistema: logo animado, selector de mesa, ilustraciones de
   producto y confirmación usan la misma silueta.
 - **Animaciones**: humo de fondo continuo entre pantallas, arco que se dibuja al entrar, carrusel de productos con escala/opacidad,

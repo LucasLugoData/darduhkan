@@ -20,11 +20,13 @@ abstract final class DD {
   static const accent = Color(0xFFEDE7DC);
 
   // Humo
-  static const smokeViolet = Color(0xFF4A2F9E);
-  static const smokeTeal = Color(0xFF0E5560);
-  static const smokeWine = Color(0xFF6B1A44);
-  static const smokeIndigo = Color(0xFF1D2C7A);
-  static const shimmer = [Color(0xFFE9E6F2), Color(0xFFB7A6FF), Color(0xFF7FD3C8), Color(0xFFE6B7D0)];
+  static const smokeViolet = Color(0xFF231447);
+  static const smokeTeal = Color(0xFF06292F);
+  static const smokeWine = Color(0xFF320A21);
+  static const smokeIndigo = Color(0xFF0D1338);
+
+  /// Brillo metálico, como el marco plateado de la carta.
+  static const shimmer = [Color(0xFFF4F4F6), Color(0xFF7D7D86), Color(0xFFDADAE0), Color(0xFF5E5E66)];
 
   static const radius = 22.0;
   static const fast = Duration(milliseconds: 220);
