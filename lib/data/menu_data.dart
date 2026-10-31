@@ -67,6 +67,18 @@ const categories = [shishas, comida, cocteles, copas, cervezas, bebidas, botella
 const _extraHead = Extra('Cabeza extra', 500);
 const _premium = Extra('Red Bull / Premium', 100);
 
+/// Menú al estilo fast food: plato + acompañamiento + bebida por un suplemento.
+const comboPrice = 350;
+const comboSides = ['Patatas', 'Ensalada'];
+const comboDrinks = [
+  Extra('Refresco', 0),
+  Extra('Agua', 0),
+  Extra('Zumo', 0),
+  Extra('Poms', 0),
+  Extra('Ginger Ale', 0),
+  Extra('Red Bull', 100),
+];
+
 /// `"Piña Colada"` → `"pina-colada"`.
 String slug(String s) {
   const from = 'áéíóúüñàèìòùâêîôûäëïöçî';
@@ -89,6 +101,7 @@ MenuItem _i(
   String tag = '',
   List<String> variants = const [],
   List<Extra> extras = const [],
+  bool combo = false,
   String? image,
 }) => MenuItem(
   id: '${c.id}-${slug(section)}-${slug(name)}',
@@ -102,6 +115,7 @@ MenuItem _i(
   tag: tag,
   variants: variants,
   extras: extras,
+  combo: combo,
 );
 
 MenuItem _shisha(String name, [String desc = '']) => _i(
@@ -120,6 +134,7 @@ MenuItem _food(
   String desc = '',
   List<String> variants = const [],
   IconData? icon,
+  bool combo = false,
 }) => _i(
   comida,
   'Tapas y bocadillos',
@@ -129,6 +144,7 @@ MenuItem _food(
   tag: 'Cocina',
   variants: variants,
   icon: icon,
+  combo: combo,
   image: name.startsWith('Croquetas') ? 'comida-croquetas' : null,
 );
 
@@ -207,21 +223,22 @@ final List<MenuItem> menu = [
 
   // Comida
   _food('Patatas Bravas', 500, icon: Icons.tapas_outlined),
-  _food('Alitas', 450, icon: Icons.kebab_dining_outlined),
+  _food('Alitas', 450, icon: Icons.kebab_dining_outlined, combo: true),
   _food(
     'Bocadillo de pinchos',
     700,
     variants: ['Pollo', 'Ternera', 'Salchichas'],
     icon: Icons.bakery_dining_outlined,
+    combo: true,
   ),
-  _food('Hamburguesa', 650, variants: ['Ternera', 'Pollo']),
-  _food('Hamburguesa Vegetal', 650),
-  _food('Hamburguesa Champiñones', 650),
+  _food('Hamburguesa', 650, variants: ['Ternera', 'Pollo'], combo: true),
+  _food('Hamburguesa Vegetal', 650, combo: true),
+  _food('Hamburguesa Champiñones', 650, combo: true),
   _food('Plato combinado', 850, icon: Icons.dinner_dining_outlined),
-  _food('Nuggets', 450, icon: Icons.fastfood_outlined),
+  _food('Nuggets', 450, icon: Icons.fastfood_outlined, combo: true),
   _food('Pimientos de Padrón', 300, icon: Icons.eco_outlined),
-  _food('Bocadillo de Atún', 350, icon: Icons.bakery_dining_outlined),
-  _food('Bocadillo Tortilla Francesa', 350, icon: Icons.bakery_dining_outlined),
+  _food('Bocadillo de Atún', 350, icon: Icons.bakery_dining_outlined, combo: true),
+  _food('Bocadillo Tortilla Francesa', 350, icon: Icons.bakery_dining_outlined, combo: true),
   _food('Croquetas de Boletus', 650, icon: Icons.egg_outlined),
   _food('Croquetas de Pollo', 650, icon: Icons.egg_outlined),
   _food('Croquetas de Pulpo', 680, icon: Icons.egg_outlined),
@@ -235,8 +252,9 @@ final List<MenuItem> menu = [
     780,
     variants: ['Pollo', 'Ternera', 'Salchichas', 'Atún', 'Cordon bleu'],
     icon: Icons.local_dining_outlined,
+    combo: true,
   ),
-  _food('Tacos Tenders', 780, icon: Icons.local_dining_outlined),
+  _food('Tacos Tenders', 780, icon: Icons.local_dining_outlined, combo: true),
   _food('Espinacas y Queso Azul', 670, icon: Icons.eco_outlined),
   _food('Fingers de Mozzarella', 650, icon: Icons.tapas_outlined),
   _food('Plato de Fruta', 450, icon: Icons.apple_outlined),

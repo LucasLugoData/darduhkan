@@ -35,9 +35,11 @@ OUT = ROOT / "assets" / "products"
 INDEX = ROOT / "lib" / "data" / "product_images.g.dart"
 
 STYLE = (
-    "Studio product photography for a premium dark-themed lounge menu app. "
-    "Single subject centered, three-quarter front view, filling most of the frame. "
-    "Soft warm key light with a subtle rim light, photorealistic, appetizing, rich natural colours. "
+    "Hyperrealistic 3D product render that looks like a photo: glossy, ultra-detailed, "
+    "vivid saturated colours, juicy specular highlights, for a premium dark-themed lounge menu app. "
+    "Straight-on front view at eye level, single subject centered, filling most of the frame. "
+    "Dark, high-contrast low-key lighting: strong key light from one side, deep shadows on the subject, "
+    "crisp bright rim light outlining the edges. "
     "Isolated on a fully transparent background: no backdrop, no table surface, no ground shadow, "
     "no text, no logos, no brand labels."
 )

@@ -3,19 +3,34 @@ import 'package:flutter/widgets.dart';
 import '../data/models.dart';
 
 class OrderLine {
-  OrderLine({required this.item, this.variant, this.extras = const [], this.qty = 1});
+  OrderLine({
+    required this.item,
+    this.variant,
+    this.extras = const [],
+    this.combo = const [],
+    this.comboPrice = 0,
+    this.qty = 1,
+  });
 
   final MenuItem item;
   final String? variant;
   final List<Extra> extras;
+
+  /// Acompañamiento y bebida si se pidió en menú; vacío si va solo.
+  final List<String> combo;
+  final int comboPrice;
   int qty;
 
-  int get unitPrice => item.price + extras.fold(0, (s, e) => s + e.price);
+  int get unitPrice => item.price + comboPrice + extras.fold(0, (s, e) => s + e.price);
   int get total => unitPrice * qty;
 
-  String get key => '${item.id}|${variant ?? ''}|${extras.map((e) => e.name).join(',')}';
+  String get key => '${item.id}|${variant ?? ''}|${extras.map((e) => e.name).join(',')}|${combo.join(',')}';
 
-  String get detail => [?variant, ...extras.map((e) => '+ ${e.name}')].join(' · ');
+  String get detail => [
+    ?variant,
+    if (combo.isNotEmpty) 'Menú: ${combo.join(' + ')}',
+    ...extras.map((e) => '+ ${e.name}'),
+  ].join(' · ');
 }
 
 class PlacedOrder {
@@ -47,8 +62,22 @@ class Order extends ChangeNotifier {
   int get total => _lines.fold(0, (s, l) => s + l.total);
   bool get isEmpty => _lines.isEmpty;
 
-  void add(MenuItem item, {String? variant, List<Extra> extras = const [], int qty = 1}) {
-    final line = OrderLine(item: item, variant: variant, extras: extras, qty: qty);
+  void add(
+    MenuItem item, {
+    String? variant,
+    List<Extra> extras = const [],
+    List<String> combo = const [],
+    int comboPrice = 0,
+    int qty = 1,
+  }) {
+    final line = OrderLine(
+      item: item,
+      variant: variant,
+      extras: extras,
+      combo: combo,
+      comboPrice: comboPrice,
+      qty: qty,
+    );
     final i = _lines.indexWhere((l) => l.key == line.key);
     if (i >= 0) {
       _lines[i].qty += qty;

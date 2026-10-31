@@ -40,6 +40,7 @@ class MenuItem {
     this.tag = '',
     this.variants = const [],
     this.extras = const [],
+    this.combo = false,
     required this.imageKey,
   });
 
@@ -57,6 +58,9 @@ class MenuItem {
   final String tag;
   final List<String> variants;
   final List<Extra> extras;
+
+  /// Se puede pedir solo o en menú (acompañamiento + bebida).
+  final bool combo;
 
   /// Clave de la foto en `assets/products/<imageKey>.webp`. Varios productos
   /// pueden compartirla (p. ej. todas las copas de whisky).

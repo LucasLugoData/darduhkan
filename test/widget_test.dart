@@ -18,6 +18,17 @@ void main() {
     expect(order.total, 1500 * 3 + 500);
   });
 
+  test('el mismo plato solo y en menú son líneas distintas y el menú suma su precio', () {
+    final order = Order(table: 2);
+    final nuggets = itemsOf(comida).firstWhere((i) => i.name == 'Nuggets');
+    expect(nuggets.combo, isTrue);
+    order.add(nuggets);
+    order.add(nuggets, combo: ['Patatas', 'Red Bull'], comboPrice: comboPrice + 100);
+    expect(order.lines.length, 2);
+    expect(order.lines.last.detail, 'Menú: Patatas + Red Bull');
+    expect(order.total, 450 * 2 + comboPrice + 100);
+  });
+
   test('enviar el pedido vacía el carrito', () async {
     final order = Order(table: 7)..add(itemsOf(bebidas).first, qty: 2);
     final placed = await order.submit();

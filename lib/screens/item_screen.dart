@@ -5,6 +5,7 @@ import '../data/models.dart';
 import '../state/order.dart';
 import '../theme.dart';
 import '../widgets/arch.dart';
+import '../widgets/combo_sheet.dart';
 import '../widgets/common.dart';
 import '../widgets/smoke.dart';
 
@@ -56,16 +57,30 @@ class _ItemScreenState extends State<ItemScreen> {
 
   int get _unit => _item.price + _extras.fold(0, (s, e) => s + e.price);
 
-  void _add() {
+  Future<void> _add() async {
     final item = _item;
     if (item.needsChoice && _variant == null) {
       HapticFeedback.heavyImpact();
       toast(context, 'Elige una opción para ${item.name}', icon: Icons.touch_app_outlined);
       return;
     }
+    var combo = const <String>[];
+    var comboPrice = 0;
+    if (item.combo) {
+      final r = await ComboSheet.show(context, item, _unit);
+      if (r == null || !mounted) return;
+      (combo: combo, price: comboPrice) = r;
+    }
     HapticFeedback.mediumImpact();
-    OrderScope.read(context).add(item, variant: _variant, extras: _extras.toList(), qty: _qty);
-    toast(context, '$_qty × ${item.name} añadido al pedido');
+    OrderScope.read(context).add(
+      item,
+      variant: _variant,
+      extras: _extras.toList(),
+      combo: combo,
+      comboPrice: comboPrice,
+      qty: _qty,
+    );
+    toast(context, '$_qty × ${item.name}${combo.isEmpty ? '' : ' (menú)'} añadido al pedido');
     Navigator.of(context).pop();
   }
 
