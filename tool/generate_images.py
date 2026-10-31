@@ -92,11 +92,8 @@ def body_center(img: Image.Image) -> float:
     mitad inferior, para que adornos laterales (piña, manguera) no lo descentren."""
     a = img.getchannel("A")
     w, h = a.size
-    cols = [0] * w
-    px = a.load()
-    for y in range(h // 2, h):
-        for x in range(w):
-            cols[x] += px[x, y]
+    # Reducir a una fila con BOX da la media de cada columna (rápido, sin bucles por píxel).
+    cols = list(a.crop((0, h // 2, w, h)).resize((w, 1), Image.BOX).getdata())
     total = sum(cols)
     return sum(x * c for x, c in enumerate(cols)) / total if total else w / 2
 

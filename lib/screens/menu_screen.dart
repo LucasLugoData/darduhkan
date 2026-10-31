@@ -9,8 +9,8 @@ import '../widgets/arch.dart';
 import '../widgets/common.dart';
 import '../widgets/smoke.dart';
 import 'cart_screen.dart';
-import 'item_screen.dart';
-import 'welcome_screen.dart';
+import 'item_sheet.dart';
+import 'table_sheet.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -38,18 +38,6 @@ class _MenuScreenState extends State<MenuScreen> {
     return menu
         .where((i) => _norm('${i.name} ${i.description} ${i.section} ${i.category.name}').contains(q))
         .toList();
-  }
-
-  void _openItem(MenuItem item, List<MenuItem> siblings) {
-    Navigator.of(context).push(ItemScreen.route(siblings, siblings.indexOf(item)));
-  }
-
-  void _quickAdd(MenuItem item, List<MenuItem> siblings) {
-    // Lo que pide elegir algo (variante, extras o menú) pasa por la ficha.
-    if (item.needsChoice || item.combo || item.extras.isNotEmpty) return _openItem(item, siblings);
-    HapticFeedback.lightImpact();
-    OrderScope.read(context).add(item);
-    toast(context, '${item.name} añadido al pedido');
   }
 
   void _toggleSearch() {
@@ -100,8 +88,8 @@ class _MenuScreenState extends State<MenuScreen> {
                                   : _CarouselView(
                                       items: items,
                                       bottom: reserve,
-                                      onOpen: (i) => _openItem(i, items),
-                                      onAdd: (i) => _quickAdd(i, items),
+                                      onOpen: (i) => addToOrder(context, i, ask: true),
+                                      onAdd: (i) => addToOrder(context, i),
                                     ),
                             ),
                           ),
@@ -142,8 +130,8 @@ class _MenuScreenState extends State<MenuScreen> {
       delay: Duration(milliseconds: 30 * i.clamp(0, 10)),
       child: _ItemRow(
         item: items[i],
-        onTap: () => _openItem(items[i], items),
-        onAdd: () => _quickAdd(items[i], items),
+        onTap: () => addToOrder(context, items[i], ask: true),
+        onAdd: () => addToOrder(context, items[i]),
       ),
     ),
   );
@@ -160,9 +148,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 Text('DAR DUKHAN', style: DD.brand(size: 14, spacing: 4)),
                 const SizedBox(height: 2),
                 GestureDetector(
-                  onTap: () =>
-                      Navigator.of(context)
-                          .pushReplacement(MaterialPageRoute<void>(builder: (_) => const WelcomeScreen())),
+                  onTap: () => showTableSheet(context),
                   child: Row(
                     children: [
                       Container(
@@ -172,7 +158,8 @@ class _MenuScreenState extends State<MenuScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Mesa ${order.table ?? '-'}',
+                        'Mesa ${order.table ?? '-'}'
+                        '${order.rounds.isEmpty ? '' : ' · ${order.rounds.length} ${order.rounds.length == 1 ? 'ronda' : 'rondas'}'}',
                         style: const TextStyle(color: DD.textDim, fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       const Icon(Icons.expand_more, size: 16, color: DD.textDim),
@@ -196,21 +183,6 @@ class _MenuScreenState extends State<MenuScreen> {
               setState(() => _list = !_list);
             },
           ),
-          const SizedBox(width: 8),
-          RoundIconButton(
-            icon: Icons.notifications_none_rounded,
-            tooltip: 'Llamar al camarero',
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              toast(
-                context,
-                'Hemos avisado a un camarero. Enseguida va a la mesa ${order.table}.',
-                icon: Icons.room_service_outlined,
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-          const CartButton(),
         ],
       ),
     );
@@ -324,10 +296,7 @@ class _CarouselViewState extends State<_CarouselView> {
                     child: GestureDetector(
                       onTap: () => widget.onOpen(widget.items[i]),
                       child: Center(
-                        child: Hero(
-                          tag: 'art-${widget.items[i].id}',
-                          child: ItemArt(item: widget.items[i], size: Size(w, w * 1.3), glow: 1.25),
-                        ),
+                        child: ItemArt(item: widget.items[i], size: Size(w, w * 1.3), glow: 1.25),
                       ),
                     ),
                   ),

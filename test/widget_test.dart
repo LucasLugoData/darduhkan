@@ -37,6 +37,18 @@ void main() {
     expect(order.isEmpty, isTrue);
   });
 
+  test('la mesa guarda las rondas anteriores y su total', () async {
+    final order = Order(table: 3)..add(itemsOf(bebidas).first);
+    await order.submit();
+    order.add(itemsOf(shishas).first);
+    final second = await order.submit();
+    expect(second.round, 2);
+    expect(order.rounds.length, 2);
+    expect(order.tableTotal, itemsOf(bebidas).first.price + 1500);
+    order.table = 4;
+    expect(order.rounds, isEmpty);
+  });
+
   test('cada categoría tiene productos y los ids son únicos', () {
     for (final c in categories) {
       expect(itemsOf(c), isNotEmpty);

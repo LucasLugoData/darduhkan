@@ -34,11 +34,22 @@ class OrderLine {
 }
 
 class PlacedOrder {
-  const PlacedOrder({required this.number, required this.table, required this.lines, required this.note});
+  const PlacedOrder({
+    required this.number,
+    required this.table,
+    required this.lines,
+    required this.note,
+    required this.round,
+    required this.at,
+  });
   final String number;
   final int table;
   final List<OrderLine> lines;
   final String note;
+
+  /// Número de ronda en la mesa (1, 2, 3…).
+  final int round;
+  final DateTime at;
   int get total => lines.fold(0, (s, l) => s + l.total);
 }
 
@@ -59,6 +70,11 @@ class Order extends ChangeNotifier {
 
   List<OrderLine> get lines => List.unmodifiable(_lines);
   int get count => _lines.fold(0, (s, l) => s + l.qty);
+
+  /// Rondas ya enviadas por mesa: la cuenta de la mesa se ve aunque se pidan varias.
+  final Map<int, List<PlacedOrder>> _rounds = {};
+  List<PlacedOrder> get rounds => List.unmodifiable(_rounds[_table ?? 0] ?? const []);
+  int get tableTotal => rounds.fold(0, (s, r) => s + r.total);
   int get total => _lines.fold(0, (s, l) => s + l.total);
   bool get isEmpty => _lines.isEmpty;
 
@@ -104,12 +120,17 @@ class Order extends ChangeNotifier {
   Future<PlacedOrder> submit() async {
     await Future<void>.delayed(const Duration(milliseconds: 900));
     _sent++;
+    final table = _table ?? 0;
+    final history = _rounds.putIfAbsent(table, () => []);
     final placed = PlacedOrder(
-      number: '${_table ?? 0}${_sent.toString().padLeft(2, '0')}',
-      table: _table ?? 0,
+      number: '$table${_sent.toString().padLeft(2, '0')}',
+      table: table,
       lines: List.of(_lines),
       note: note,
+      round: history.length + 1,
+      at: DateTime.now(),
     );
+    history.add(placed);
     _lines.clear();
     note = '';
     notifyListeners();
