@@ -1,5 +1,3 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -24,22 +22,14 @@ class MenuScreen extends StatefulWidget {
 class _MenuScreenState extends State<MenuScreen> {
   Category _category = categories.first;
   String _query = '';
+  bool _searching = false;
+  bool _list = false;
   final _search = TextEditingController();
-  final _scroll = ScrollController();
 
   @override
   void dispose() {
     _search.dispose();
-    _scroll.dispose();
     super.dispose();
-  }
-
-  void _select(Category c) {
-    if (c == _category) return;
-    setState(() => _category = c);
-    if (_scroll.hasClients && _scroll.offset > 260) {
-      _scroll.animateTo(260, duration: DD.medium, curve: DD.curve);
-    }
   }
 
   List<MenuItem> get _results {
@@ -50,35 +40,35 @@ class _MenuScreenState extends State<MenuScreen> {
         .toList();
   }
 
-  String _greeting() {
-    final h = DateTime.now().hour;
-    if (h >= 6 && h < 14) return 'Buenos días';
-    if (h >= 14 && h < 20) return 'Buenas tardes';
-    return 'Buenas noches';
-  }
-
   void _openItem(MenuItem item, List<MenuItem> siblings) {
     Navigator.of(context).push(ItemScreen.route(siblings, siblings.indexOf(item)));
   }
 
   void _quickAdd(MenuItem item, List<MenuItem> siblings) {
-    if (item.needsChoice) return _openItem(item, siblings);
+    // Lo que pide elegir algo (variante, extras o menú) pasa por la ficha.
+    if (item.needsChoice || item.combo || item.extras.isNotEmpty) return _openItem(item, siblings);
     HapticFeedback.lightImpact();
     OrderScope.read(context).add(item);
     toast(context, '${item.name} añadido al pedido');
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _searching = !_searching;
+      if (!_searching) {
+        _search.clear();
+        _query = '';
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final order = OrderScope.of(context);
     final items = _results;
-    final searching = _query.trim().isNotEmpty;
-
-    // Agrupa por sección conservando el orden de la carta.
-    final sections = <String, List<MenuItem>>{};
-    for (final i in items) {
-      sections.putIfAbsent(searching ? i.category.name : i.section, () => []).add(i);
-    }
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    // Hueco para la barra del pedido y la barra de navegación del sistema.
+    final reserve = (order.count > 0 ? 96.0 : 16.0) + bottomInset;
 
     return Scaffold(
       body: Smoke(
@@ -86,49 +76,56 @@ class _MenuScreenState extends State<MenuScreen> {
           children: [
             SafeArea(
               bottom: false,
-              child: CustomScrollView(
-                controller: _scroll,
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                slivers: [
-                  SliverToBoxAdapter(child: _header(order)),
-                  SliverToBoxAdapter(child: _hero()),
-                  SliverToBoxAdapter(child: _searchField()),
-                  SliverPersistentHeader(pinned: true, delegate: _ChipsHeader(_chips())),
-                  if (!searching) SliverToBoxAdapter(child: _banner()),
-                  if (items.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: Text('Nada por aquí con "$_query"', style: TextStyle(color: DD.textDim)),
-                      ),
-                    ),
-                  for (final entry in sections.entries) ...[
-                    if (sections.length > 1 || searching)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 22, 24, 6),
-                          child: Text(entry.key, style: DD.script(size: 24, color: DD.silver)),
-                        ),
-                      ),
-                    SliverList.builder(
-                      itemCount: entry.value.length,
-                      itemBuilder: (_, i) {
-                        final item = entry.value[i];
-                        final siblings = searching ? items : itemsOf(item.category);
-                        return FadeSlideIn(
-                          key: ValueKey('${_category.id}-$_query-${item.id}'),
-                          delay: Duration(milliseconds: 30 * i.clamp(0, 10)),
-                          child: _ItemRow(
-                            item: item,
-                            onTap: () => _openItem(item, siblings),
-                            onAdd: () => _quickAdd(item, siblings),
+              child: Column(
+                children: [
+                  _header(order),
+                  AnimatedSize(
+                    duration: DD.medium,
+                    curve: DD.curve,
+                    child: _searching ? _searchField() : const SizedBox(width: double.infinity),
+                  ),
+                  SizedBox(height: 64, child: _chips()),
+                  Expanded(
+                    child: items.isEmpty
+                        ? Center(
+                            child: Text('Nada por aquí con "$_query"', style: const TextStyle(color: DD.textDim)),
+                          )
+                        : AnimatedSwitcher(
+                            duration: DD.medium,
+                            switchInCurve: DD.curve,
+                            child: KeyedSubtree(
+                              key: ValueKey('${_category.id}|$_query|$_list'),
+                              child: _list
+                                  ? _listView(items, reserve)
+                                  : _CarouselView(
+                                      items: items,
+                                      bottom: reserve,
+                                      onOpen: (i) => _openItem(i, items),
+                                      onAdd: (i) => _quickAdd(i, items),
+                                    ),
+                            ),
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                  ),
                 ],
+              ),
+            ),
+            // Difumina lo que pasa por debajo de la barra del pedido y de la del sistema.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: reserve + 24,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [DD.bg.withValues(alpha: 0), DD.bg.withValues(alpha: 0.92), DD.bg],
+                      stops: const [0, 0.45, 1],
+                    ),
+                  ),
+                ),
               ),
             ),
             _CartBar(order: order),
@@ -138,25 +135,24 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
+  Widget _listView(List<MenuItem> items, double bottom) => ListView.builder(
+    padding: EdgeInsets.only(top: 4, bottom: bottom),
+    itemCount: items.length,
+    itemBuilder: (_, i) => FadeSlideIn(
+      delay: Duration(milliseconds: 30 * i.clamp(0, 10)),
+      child: _ItemRow(
+        item: items[i],
+        onTap: () => _openItem(items[i], items),
+        onAdd: () => _quickAdd(items[i], items),
+      ),
+    ),
+  );
+
   Widget _header(Order order) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Row(
         children: [
-          ClipPath(
-            clipper: const ArchClipper(),
-            child: Container(
-              width: 38,
-              height: 46,
-              color: DD.surfaceHi,
-              alignment: const Alignment(0, 0.45),
-              child: CustomPaint(
-                size: const Size(13, 22),
-                painter: HookahPainter(color: DD.silver),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,6 +183,21 @@ class _MenuScreenState extends State<MenuScreen> {
             ),
           ),
           RoundIconButton(
+            icon: _searching ? Icons.close : Icons.search,
+            tooltip: 'Buscar',
+            onTap: _toggleSearch,
+          ),
+          const SizedBox(width: 8),
+          RoundIconButton(
+            icon: _list ? Icons.view_carousel_outlined : Icons.view_agenda_outlined,
+            tooltip: _list ? 'Ver de una en una' : 'Ver en lista',
+            onTap: () {
+              HapticFeedback.selectionClick();
+              setState(() => _list = !_list);
+            },
+          ),
+          const SizedBox(width: 8),
+          RoundIconButton(
             icon: Icons.notifications_none_rounded,
             tooltip: 'Llamar al camarero',
             onTap: () {
@@ -198,26 +209,8 @@ class _MenuScreenState extends State<MenuScreen> {
               );
             },
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           const CartButton(),
-        ],
-      ),
-    );
-  }
-
-  Widget _hero() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 28, 24, 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(_greeting(), style: const TextStyle(color: DD.textDim, fontSize: 15)),
-          const SizedBox(height: 6),
-          const Text(
-            '¿Qué te apetece',
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, height: 1.15, letterSpacing: -0.5),
-          ),
-          ShimmerText('esta noche?', style: DD.script(size: 40)),
         ],
       ),
     );
@@ -225,27 +218,19 @@ class _MenuScreenState extends State<MenuScreen> {
 
   Widget _searchField() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 6),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: TextField(
         controller: _search,
+        autofocus: true,
         onChanged: (v) => setState(() => _query = v),
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: 'Busca un sabor, una copa, una tapa…',
           hintStyle: const TextStyle(color: DD.textDim),
           prefixIcon: const Icon(Icons.search, color: DD.textDim),
-          suffixIcon: _query.isEmpty
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close, color: DD.textDim),
-                  onPressed: () => setState(() {
-                    _search.clear();
-                    _query = '';
-                  }),
-                ),
           filled: true,
           fillColor: DD.surface,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(18),
@@ -272,81 +257,146 @@ class _MenuScreenState extends State<MenuScreen> {
           label: c.name,
           icon: c.icon,
           selected: c == _category && _query.isEmpty,
-          onTap: () {
-            if (_query.isNotEmpty) {
-              _search.clear();
-              _query = '';
-            }
-            _select(c);
-            setState(() {});
-          },
+          onTap: () => setState(() {
+            _search.clear();
+            _query = '';
+            _searching = false;
+            _category = c;
+          }),
         );
       },
     );
   }
+}
 
-  Widget _banner() {
-    final c = _category;
-    final sample = itemsOf(c).first;
+/// Carta de una en una: se pasa deslizando; la central crece y las laterales asoman.
+class _CarouselView extends StatefulWidget {
+  const _CarouselView({required this.items, required this.bottom, required this.onOpen, required this.onAdd});
+  final List<MenuItem> items;
+  final double bottom;
+  final ValueChanged<MenuItem> onOpen;
+  final ValueChanged<MenuItem> onAdd;
+
+  @override
+  State<_CarouselView> createState() => _CarouselViewState();
+}
+
+class _CarouselViewState extends State<_CarouselView> {
+  final _pages = PageController(viewportFraction: 0.74);
+  int _index = 0;
+
+  @override
+  void dispose() {
+    _pages.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.items[_index];
+    final n = widget.items.length;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
-      child: AnimatedSwitcher(
-        duration: DD.medium,
-        switchInCurve: DD.curve,
-        transitionBuilder: (child, a) => FadeTransition(
-          opacity: a,
-          child: SlideTransition(
-            position: Tween(begin: const Offset(0.06, 0), end: Offset.zero).animate(a),
-            child: child,
-          ),
-        ),
-        child: Container(
-          key: ValueKey(c.id),
-          height: 150,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(DD.radius + 4),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [c.tint.withValues(alpha: 0.22), DD.surface],
-            ),
-            border: Border.all(color: DD.line),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: 22,
-                bottom: 0,
-                child: ItemArt(item: sample, size: const Size(104, 132), glow: 1.4),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(22, 22, 140, 22),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      c.bannerTitle,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.3),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(c.bannerText, style: const TextStyle(color: DD.textDim, fontSize: 13, height: 1.35)),
-                    const SizedBox(height: 12),
-                    Text(
-                      '${itemsOf(c).length} opciones',
-                      style: const TextStyle(
-                        color: DD.textDim,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                        letterSpacing: 0.5,
+      padding: EdgeInsets.only(bottom: widget.bottom),
+      child: Column(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (_, c) {
+                final h = c.maxHeight - 16;
+                final w = (c.maxWidth * 0.74 - 24).clamp(0.0, h / 1.3);
+                return PageView.builder(
+                  controller: _pages,
+                  itemCount: n,
+                  onPageChanged: (i) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _index = i);
+                  },
+                  itemBuilder: (_, i) => AnimatedBuilder(
+                    animation: _pages,
+                    builder: (_, child) {
+                      final page = _pages.hasClients && _pages.position.haveDimensions ? _pages.page! : 0.0;
+                      final t = (page - i).abs().clamp(0.0, 1.0);
+                      return Opacity(
+                        opacity: 1 - t * 0.6,
+                        child: Transform.scale(scale: 1 - t * 0.22, child: child),
+                      );
+                    },
+                    child: GestureDetector(
+                      onTap: () => widget.onOpen(widget.items[i]),
+                      child: Center(
+                        child: Hero(
+                          tag: 'art-${widget.items[i].id}',
+                          child: ItemArt(item: widget.items[i], size: Size(w, w * 1.3), glow: 1.25),
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
+          const SizedBox(height: 10),
+          AnimatedSwitcher(
+            duration: DD.medium,
+            switchInCurve: DD.curve,
+            transitionBuilder: (c, a) => FadeTransition(
+              opacity: a,
+              child: SlideTransition(
+                position: Tween(begin: const Offset(0, 0.12), end: Offset.zero).animate(a),
+                child: c,
+              ),
+            ),
+            child: Padding(
+              key: ValueKey(item.id),
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                children: [
+                  Text(
+                    item.name,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.4),
+                  ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: 38,
+                    child: Text(
+                      item.description.isNotEmpty ? item.description : item.variants.join(' · '),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: DD.textDim, fontSize: 13.5, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                Text('${_index + 1} / $n', style: const TextStyle(color: DD.textDim, fontSize: 13)),
+                const Spacer(),
+                Text(euros(item.price), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
+                const SizedBox(width: 12),
+                Pressable(
+                  onTap: () => widget.onAdd(item),
+                  scale: 0.9,
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(color: DD.accent, shape: BoxShape.circle),
+                    child: const Icon(Icons.add, color: DD.bg),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }
@@ -362,38 +412,6 @@ String _norm(String s) {
     b.write(i >= 0 ? to[i] : ch);
   }
   return b.toString();
-}
-
-class _ChipsHeader extends SliverPersistentHeaderDelegate {
-  _ChipsHeader(this.child);
-  final Widget child;
-
-  @override
-  double get minExtent => 66;
-  @override
-  double get maxExtent => 66;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final stuck = overlapsContent || shrinkOffset > 0;
-    // Cristal esmerilado: al fijarse arriba difumina la carta y el humo que pasan por debajo.
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: stuck ? 24 : 0, sigmaY: stuck ? 24 : 0),
-        child: AnimatedContainer(
-          duration: DD.fast,
-          decoration: BoxDecoration(
-            color: DD.bg.withValues(alpha: stuck ? 0.55 : 0),
-            border: Border(bottom: BorderSide(color: stuck ? DD.line : Colors.transparent)),
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-
-  @override
-  bool shouldRebuild(_ChipsHeader old) => true;
 }
 
 class _ItemRow extends StatelessWidget {

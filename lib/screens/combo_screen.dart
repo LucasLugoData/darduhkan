@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -224,7 +226,7 @@ class _ComboScreenState extends State<ComboScreen> {
             onTap: () => _pick('menu', () {}),
             child: Column(
               children: [
-                SizedBox(height: 170, child: _comboArt(comboSides.first, comboDrinks.first)),
+                SizedBox(height: 140, child: _comboArt(comboSides.first, comboDrinks.first)),
                 const SizedBox(height: 12),
                 _label('Menú', '${widget.item.name} + acompañamiento + bebida', euros(widget.unit + comboPrice)),
               ],
@@ -256,10 +258,9 @@ class _ComboScreenState extends State<ComboScreen> {
         _title('Tu menú'),
         FadeSlideIn(child: SizedBox(height: 200, child: _comboArt(_side!, _drink!))),
         const SizedBox(height: 18),
-        _summaryRow(widget.item.name, euros(widget.unit), null),
+        _summaryRow('Menú ${widget.item.name}', euros(widget.unit + comboPrice), null),
         _summaryRow(_side!.name, 'Incluido', 1),
         _summaryRow(_drink!.name, _drink!.price == 0 ? 'Incluida' : '+${euros(_drink!.price)}', 2),
-        _summaryRow('Suplemento menú', euros(comboPrice), null),
       ],
     ),
   };
@@ -315,16 +316,17 @@ class _ComboScreenState extends State<ComboScreen> {
     );
   }
 
-  /// Plato grande con el acompañamiento y la bebida asomando a los lados.
+  /// Acompañamiento, plato y bebida en fila, escalados para caber siempre enteros.
   Widget _comboArt(ComboOption side, ComboOption drink) => LayoutBuilder(
     builder: (_, c) {
-      final h = c.maxHeight;
-      return Stack(
-        alignment: Alignment.bottomCenter,
+      final s = math.min(c.maxHeight, c.maxWidth / 2.4);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Positioned(left: c.maxWidth / 2 - h * 1.05, bottom: 0, child: _sized(_Photo(side.imageKey, side.icon), h * 0.62)),
-          Positioned(right: c.maxWidth / 2 - h * 1.05, bottom: 0, child: _sized(_Photo(drink.imageKey, drink.icon), h * 0.72)),
-          _sized(_Photo(widget.item.imageKey, widget.item.icon), h),
+          _sized(_Photo(side.imageKey, side.icon), s * 0.64),
+          _sized(_Photo(widget.item.imageKey, widget.item.icon), s),
+          _sized(_Photo(drink.imageKey, drink.icon), s * 0.74),
         ],
       );
     },

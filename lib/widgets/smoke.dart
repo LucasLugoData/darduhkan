@@ -112,7 +112,8 @@ class _SmokePainter extends CustomPainter {
 }
 
 /// Humo que sale de la cazoleta de la cachimba: bocanadas suaves que suben,
-/// se ensanchan, se mecen y se desvanecen. [origin] va en fracciones del tamaño.
+/// se ensanchan, se mecen y se desvanecen antes de llegar al borde superior (así
+/// nunca se ve un corte). [origin] va en fracciones del tamaño.
 class HookahWisp extends StatefulWidget {
   const HookahWisp({super.key, this.origin = const Offset(0.5, 0.06)});
   final Offset origin;
@@ -139,13 +140,15 @@ class _WispPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final u = size.width;
     final o = Offset(size.width * origin.dx, size.height * origin.dy);
+    // Sube como mucho hasta un poco por debajo del borde, y ya invisible.
+    final rise = o.dy * 0.8;
     for (var i = 0; i < _puffs; i++) {
       final p = ((time.value / _period) + i / _puffs) % 1;
-      // Aparece rápido, se apaga despacio.
-      final alpha = math.sin(math.pi * math.pow(p, 0.6)) * 0.16;
+      // Aparece rápido, se apaga despacio y llega a 0 en lo alto.
+      final alpha = math.sin(math.pi * math.pow(p, 0.6)) * math.pow(1 - p, 0.8) * 0.2;
       final sway = math.sin(time.value * 0.9 + i * 1.3) * u * 0.05 * p;
-      final c = o + Offset(sway + u * 0.04 * p, -u * 0.42 * Curves.easeOutSine.transform(p));
-      final r = u * (0.025 + 0.11 * p);
+      final c = o + Offset(sway + u * 0.03 * p, -rise * Curves.easeOutSine.transform(p));
+      final r = math.min(u * (0.025 + 0.09 * p), rise * 0.35);
       canvas.drawCircle(
         c,
         r,

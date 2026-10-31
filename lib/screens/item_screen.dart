@@ -31,7 +31,7 @@ class ItemScreen extends StatefulWidget {
 }
 
 class _ItemScreenState extends State<ItemScreen> {
-  late final _pages = PageController(viewportFraction: 0.56, initialPage: widget.initial);
+  late final _pages = PageController(viewportFraction: 0.72, initialPage: widget.initial);
   late int _index = widget.initial;
   String? _variant;
   final Set<Extra> _extras = {};
@@ -113,9 +113,7 @@ class _ItemScreenState extends State<ItemScreen> {
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Column(
                     children: [
-                      const SizedBox(height: 20),
-                      _infoCards(item),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 16),
                       _carousel(),
                       const SizedBox(height: 8),
                       _dots(),
@@ -134,56 +132,9 @@ class _ItemScreenState extends State<ItemScreen> {
     );
   }
 
-  Widget _infoCards(MenuItem item) {
-    final facts = [
-      (Icons.grid_view_rounded, 'Sección', item.section),
-      (item.category.icon, 'Tipo', item.tag.isEmpty ? item.category.name : item.tag),
-      (Icons.sell_outlined, 'Precio', euros(item.price)),
-    ];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          for (final (i, f) in facts.indexed) ...[
-            if (i > 0) const SizedBox(width: 10),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
-                decoration: BoxDecoration(
-                  color: DD.surface,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: DD.line),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(f.$1, size: 18, color: DD.textDim),
-                    const SizedBox(height: 12),
-                    Text(f.$2, style: const TextStyle(color: DD.textDim, fontSize: 11.5)),
-                    const SizedBox(height: 2),
-                    AnimatedSwitcher(
-                      duration: DD.fast,
-                      child: Text(
-                        f.$3,
-                        key: ValueKey(f.$3),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   Widget _carousel() {
     return SizedBox(
-      height: 250,
+      height: 330,
       child: PageView.builder(
         controller: _pages,
         itemCount: widget.items.length,
@@ -211,7 +162,7 @@ class _ItemScreenState extends State<ItemScreen> {
               child: Center(
                 child: Hero(
                   tag: 'art-${it.id}',
-                  child: ItemArt(item: it, size: const Size(184, 240), glow: 1.25),
+                  child: ItemArt(item: it, size: const Size(240, 312), glow: 1.25),
                 ),
               ),
             ),

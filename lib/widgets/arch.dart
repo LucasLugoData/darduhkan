@@ -171,7 +171,14 @@ class ItemArt extends StatelessWidget {
 
     // La foto (PNG/WebP transparente) se posa sobre el arco y asoma un poco por los lados,
     // como los platos de las referencias.
-    final over = size.width * 0.1;
+    // Las fotos de shisha no traen humo: lo pone la app sobre la cazoleta (solo en
+    // tamaño grande, en las listas sería ruido). Para que el humo tenga sitio dentro
+    // del arco y no se corte, la cachimba se dibuja algo más pequeña.
+    final smoke = item.category.art == ArtKind.hookah && size.width >= 120;
+    final side = size.width * (smoke ? 0.96 : 1.2);
+    final bottom = size.height * 0.03;
+    // La cazoleta queda en lo alto de la foto (el script la recorta al contenido).
+    final bowlY = (size.height - bottom - side * 0.95) / size.height;
     return SizedBox.fromSize(
       size: size,
       child: Stack(
@@ -179,28 +186,18 @@ class ItemArt extends StatelessWidget {
         children: [
           Positioned.fill(child: arch),
           Positioned(
-            left: -over,
-            right: -over,
-            bottom: size.height * 0.03,
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: Stack(
-                fit: StackFit.expand,
-                clipBehavior: Clip.none,
-                children: [
-                  Image.asset(
-                    'assets/products/${item.imageKey}.webp',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.medium,
-                    cacheWidth: (size.width * 2.4).round(),
-                  ),
-                  // Las fotos de shisha no traen humo: lo pone la app sobre la cazoleta
-                  // (solo en tamaño grande, en las listas sería ruido).
-                  if (item.category.art == ArtKind.hookah && size.width >= 120) const HookahWisp(),
-                ],
-              ),
+            left: (size.width - side) / 2,
+            width: side,
+            height: side,
+            bottom: bottom,
+            child: Image.asset(
+              'assets/products/${item.imageKey}.webp',
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.medium,
+              cacheWidth: (size.width * 2.4).round(),
             ),
           ),
+          if (smoke) Positioned.fill(child: HookahWisp(origin: Offset(0.5, bowlY))),
         ],
       ),
     );

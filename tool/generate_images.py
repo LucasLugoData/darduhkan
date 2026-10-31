@@ -38,8 +38,10 @@ OUT = ROOT / "assets" / "products"
 INDEX = ROOT / "lib" / "data" / "product_images.g.dart"
 
 STYLE = (
-    "Hyperrealistic 3D product render that looks like a photo: glossy, ultra-detailed, "
-    "vivid saturated colours, juicy specular highlights, for a premium dark-themed lounge menu app. "
+    "Real professional commercial studio photograph for a premium dark-themed lounge menu app, "
+    "shot on a full-frame camera with a 100mm macro lens: true-to-life textures and materials, "
+    "natural imperfections, natural colours, sharp focus. Not an illustration, not a 3D render, "
+    "not CGI, no painterly or cartoon look, no oversaturation. "
     "Straight-on front view at eye level, single subject centered, filling most of the frame. "
     "Dark, high-contrast low-key lighting: strong key light from one side, deep shadows on the subject, "
     "crisp bright rim light outlining the edges. "
